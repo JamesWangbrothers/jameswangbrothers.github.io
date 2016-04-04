@@ -502,11 +502,45 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
+  //Is there a faster way to access the DOM than querySelectorALL?
   var items = document.querySelectorAll('.mover');
+  //Efficient to access DOM -> document.getElementbyClass()
+
   for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+  // what are the exact numbers that phase and document.body.scrollTop give me per iteration?
+
+  //    furthermore we see that the phase value depends on the modulo operator '%', Modulo give us the remaind
+  //    therefore we are calculting the same set of 5 numbers for all of our prizza no matter how big our list
+
+    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5)); //(i % 5) modulo operat
+  //1. let's logout all these numbers and see!
+  //console.log(phase, document.body.scrollTop / 1250)
+
+    /* Using style.left, is there a more efficient to change the position of the object?
+    It looks like the layout gets re-triggered everytime we scroll, remember how the browser renders our object? 
+    DOM-> CSSOM <->Javascript -> Render Tree -> Layout -> paint 
+    Perhaps CSS3 hardware acceleration can reduce the need trigger a re-layout? Can we offload the CPU and the CSS 
+    'transdorm' property can help us here
+    CSS has hardware accelaration and certain transforms that reduce the need to trigger a re-layout 
+    lot prople using transform: tranlateX() instead of style.left*/
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
+
+  /*  Advanced Hack Here: Can we also reduce the need for the browser to paint the entire screen? Can we tell the broswer
+      actually moving? Whenever a pixel in a layer changes, the broswer repains the entire layer. therefore can we 
+      animating pizza in its own layer? Therefore whenever we animate the pizza, only a small part to the screen 
+
+      we should look up these CSS hacks to see if they can force our elements into layer:
+      transform: transformZ(0);
+      transform: translate3d(0,0,0);
+      backface-visibility: hidden;
+
+      be careful of these hack:
+
+      this hack can wreak havoc on mobile devices due to low VRAM for some mobile device:
+      Moving all of these pizza to its own composite layer offloads the texturing and painting to the GPU
+      but if the GPU cannot handle the extra memory load, there may be even poorer performance. 
+  */
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
@@ -525,6 +559,8 @@ window.addEventListener('scroll', updatePositions);
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
+
+  // I could only handful a pizza that show up on the screen at any given scroll, that amount doesn't look 
   for (var i = 0; i < 200; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
