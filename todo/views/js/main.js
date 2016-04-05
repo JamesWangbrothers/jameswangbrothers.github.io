@@ -502,28 +502,39 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  //Is there a faster way to access the DOM than querySelectorALL?
-  var items = document.querySelectorAll('.mover');
+  //var items = document.querySelectorAll('.mover');
   //Efficient to access DOM -> document.getElementbyClass()
+  var items = document.getElementsByClassName('mover');
+
+  var tops = document.body.scrollTop / 1250;
+
+  var phase = [];
+
+ 
 
   for (var i = 0; i < items.length; i++) {
-  // what are the exact numbers that phase and document.body.scrollTop give me per iteration?
 
-  //    furthermore we see that the phase value depends on the modulo operator '%', Modulo give us the remaind
-  //    therefore we are calculting the same set of 5 numbers for all of our prizza no matter how big our list
+    for (var j = 0; j < 5; j++) {
+      var number = [0,1,2,3,4];
+      phase.push(Math.sin(tops + number[j]));
+    }
+  /* what are the exact numbers that phase and document.body.scrollTop give me per iteration?
 
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5)); //(i % 5) modulo operat
-  //1. let's logout all these numbers and see!
-  //console.log(phase, document.body.scrollTop / 1250)
+      furthermore we see that the phase value depends on the modulo operator '%', Modulo give us the remainder when we divided by 5
+      therefore we are calculting the same set of 5 numbers for all of our prizza no matter how big our list of pizza are!
+  */
+    //var phase = Math.sin(tops + (i % 5)); //(i % 5) modulo operat
 
-    /* Using style.left, is there a more efficient to change the position of the object?
-    It looks like the layout gets re-triggered everytime we scroll, remember how the browser renders our object? 
-    DOM-> CSSOM <->Javascript -> Render Tree -> Layout -> paint 
-    Perhaps CSS3 hardware acceleration can reduce the need trigger a re-layout? Can we offload the CPU and the CSS 
-    'transdorm' property can help us here
-    CSS has hardware accelaration and certain transforms that reduce the need to trigger a re-layout 
-    lot prople using transform: tranlateX() instead of style.left*/
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+    /*  Using style.left, is there a more efficient to change the position of the object?
+        It looks like the layout gets re-triggered everytime we scroll, remember how the browser renders our object? 
+        DOM-> CSSOM <->Javascript -> Render Tree -> Layout -> paint 
+        Perhaps CSS3 hardware acceleration can reduce the need trigger a re-layout? Can we offload the CPU and the CSS 
+        'transdorm' property can help us here
+        CSS has hardware accelaration and certain transforms that reduce the need to trigger a re-layout 
+        lot prople using transform: tranlateX() instead of style.left
+    */
+    items[i].style.left = items[i].basicLeft + 100 * phase[i] + 'px';
+    //items[i].style.transform = 'translateX(' + (700 * phase[i]) + 'px)';
   }
 
   /*  Advanced Hack Here: Can we also reduce the need for the browser to paint the entire screen? Can we tell the broswer
@@ -561,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var s = 256;
 
   // I could only handful a pizza that show up on the screen at any given scroll, that amount doesn't look 
-  for (var i = 0; i < 200; i++) {
+  for (var i = 0; i < 30; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
