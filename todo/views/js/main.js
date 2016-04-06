@@ -1,4 +1,9 @@
 /*
+enable strict mode. This mode helps to write more "secure" codes by preventing 
+things such as marking down a function with a bad syntax to execute or loading unused variables.
+*/
+'use strict'
+/*
 Welcome to the 60fps project! Your goal is to make Cam's Pizzeria website run
 jank-free at 60 frames per second.
 
@@ -403,16 +408,23 @@ var resizePizzas = function(size) {
   window.performance.mark("mark_start_resize");   // User Timing API function
 
   // Changes the value for the size of the pizza above the slider
-  function changeSliderLabel(size) {
+ function changeSliderLabel(size) {
     switch(size) {
       case "1":
-        document.querySelector("#pizzaSize").innerHTML = "Small";
+
+        //document.getElementById() Web API call is faster
+        //document.querySelector("#pizzaSize").innerHTML = "Small";
+        document.getElementById("pizzaSize").innerHTML = "Small";
         return;
       case "2":
-        document.querySelector("#pizzaSize").innerHTML = "Medium";
+
+        //document.querySelector("#pizzaSize").innerHTML = "Medium";
+        document.getElementById("pizzaSize").innerHTML = "Medium";
         return;
       case "3":
-        document.querySelector("#pizzaSize").innerHTML = "Large";
+
+        //document.querySelector("#pizzaSize").innerHTML = "Large";
+        document.getElementById("pizzaSize").innerHTML = "Large";
         return;
       default:
         console.log("bug in changeSliderLabel");
@@ -424,7 +436,7 @@ var resizePizzas = function(size) {
    // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSlices(size).
   function determineDx (elem, size) {
     var oldWidth = elem.offsetWidth;
-    var windowWidth = document.querySelector("#randomPizzas").offsetWidth;
+    var windowWidth = document.getElementById("randomPizzas").offsetWidth;
     var oldSize = oldWidth / windowWidth;
 
     // Optional TODO: change to 3 sizes? no more xl?
@@ -449,11 +461,20 @@ var resizePizzas = function(size) {
   }
 
   // Iterates through pizza elements on the page and changes their widths
-  function changePizzaSizes(size) {
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+ function changePizzaSizes(size) {
+
+    //create a local variable to save document.getElementsByClassName('randomPizzaContainer') 
+    var container = document.getElementsByClassName('randomPizzaContainer');
+
+    //save the array length in local variable, so the array'e length property is not accessed to check its value at each iteration. It is more efficiency.
+    var containerLength = container.length;
+
+    //newwidth and dx variables can go out the loop. Actually, since the pizza sizes are all the same, I provide a fixed value prior starting the loop by selecting the [0] elements.
+    var dx = determineDx(container[0], size);
+    var newwidth = (container[0].offsetWidth + dx) + 'px';
+
+    for (var i = 0; i < containerLength; i++) {
+      container[i].style.width = newwidth;
     }
   }
 
@@ -469,8 +490,9 @@ var resizePizzas = function(size) {
 window.performance.mark("mark_start_generating"); // collect timing data
 
 // This for-loop actually creates and appends all of the pizzas when the page loads
+//declare the pizzaDiv variable outside the loop, so the function only makes one DOM call.
+var pizzasDiv = document.getElementById("randomPizzas");
 for (var i = 2; i < 100; i++) {
-  var pizzasDiv = document.getElementById("randomPizzas");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
 
@@ -502,11 +524,54 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var items = document.querySelectorAll('.mover');
+  //var items = document.querySelectorAll('.mover');
+  //Efficient to access DOM -> document.getElementbyClass()
+  var items = document.getElementsByClassName('mover');
+
+  var tops = document.body.scrollTop / 1250;
+
+  var phase = [];
+
   for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+
+    for (var j = 0; j < 5; j++) {
+      var number = [0,1,2,3,4];
+      phase.push(Math.sin(tops + number[j]));
+    }
+  /* what are the exact numbers that phase and document.body.scrollTop give me per iteration?
+
+      furthermore we see that the phase value depends on the modulo operator '%', Modulo give us the remainder when we divided by 5
+      therefore we are calculting the same set of 5 numbers for all of our prizza no matter how big our list of pizza are!
+  */
+    //var phase = Math.sin(tops + (i % 5)); //(i % 5) modulo operat
+
+    /*  Using style.left, is there a more efficient to change the position of the object?
+        It looks like the layout gets re-triggered everytime we scroll, remember how the browser renders our object? 
+        DOM-> CSSOM <->Javascript -> Render Tree -> Layout -> paint 
+        Perhaps CSS3 hardware acceleration can reduce the need trigger a re-layout? Can we offload the CPU and the CSS 
+        'transdorm' property can help us here
+        CSS has hardware accelaration and certain transforms that reduce the need to trigger a re-layout 
+        lot prople using transform: tranlateX() instead of style.left
+    */
+    items[i].style.left = items[i].basicLeft + 100 * phase[i] + 'px';
+    //items[i].style.transform = 'translateX(' + (700 * phase[i]) + 'px)';
   }
+
+  /*  Advanced Hack Here: Can we also reduce the need for the browser to paint the entire screen? Can we tell the broswer
+      actually moving? Whenever a pixel in a layer changes, the broswer repains the entire layer. therefore can we 
+      animating pizza in its own layer? Therefore whenever we animate the pizza, only a small part to the screen 
+
+      we should look up these CSS hacks to see if they can force our elements into layer:
+      transform: transformZ(0);
+      transform: translate3d(0,0,0);
+      backface-visibility: hidden;
+
+      be careful of these hack:
+
+      this hack can wreak havoc on mobile devices due to low VRAM for some mobile device:
+      Moving all of these pizza to its own composite layer offloads the texturing and painting to the GPU
+      but if the GPU cannot handle the extra memory load, there may be even poorer performance. 
+  */
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
@@ -525,15 +590,23 @@ window.addEventListener('scroll', updatePositions);
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < 200; i++) {
-    var elem = document.createElement('img');
+
+  // I could only handful a pizza that show up on the screen at any given scroll, that amount doesn't look 
+  //dynamically calculate the number of pizza needed to fill the screen.
+  //var pizzaScreen = (window.screen.height) * cols; 
+  //Declaring the elem variable outside the loop will prevent it from being created every time the loop is executed.
+  var elem;
+  //document.getElementById() Web API call is faster.
+  var movingPizzas = document.getElementById("movingPizzas1");
+  for (var i = 0; i < 30; i++) {
+    elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
     elem.style.width = "73.333px";
     elem.basicLeft = (i % cols) * s;
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
-    document.querySelector("#movingPizzas1").appendChild(elem);
+    movingPizzas.appendChild(elem);
   }
   updatePositions();
 });
