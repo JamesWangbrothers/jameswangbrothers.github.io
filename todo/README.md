@@ -1,6 +1,6 @@
 ## Website Performance Optimization portfolio project
 
-Your challenge, if you wish to accept it (and we sure hope you will), is to optimize this online portfolio for speed! In particular, optimize the critical rendering path and make this page render as quickly as possible by applying the techniques you've picked up in the [Critical Rendering Path course](https://www.udacity.com/course/ud884).
+It is a challenge I have accepted to optimize this online portfolio for speed! In particular, optimize the critical rendering path and make this page render as quickly as possible by applying the techniques I've picked up in the [Critical Rendering Path course](https://www.udacity.com/course/ud884).
 
 To get started, check out the repository, inspect the code,
 
@@ -35,6 +35,99 @@ Profile, optimize, measure... and then lather, rinse, and repeat. Good luck!
 To optimize views/pizza.html, you will need to modify views/js/main.js until your frames per second rate is 60 fps or higher. You will find instructive comments in main.js. 
 
 You might find the FPS Counter/HUD Display useful in Chrome developer tools described here: [Chrome Dev Tools tips-and-tricks](https://developer.chrome.com/devtools/docs/tips-and-tricks).
+
+### Optimize the Critical Rendering Path
+**1. Make non-block rendering for CSS and Javascripts before </body> tag in the "index.html".**
+* Adding async to javascript tag which makes it says, "I don't want the browser to stop what it's doing while it's downloading this script." It works the same to put the javascript link at the bottom of the page like below.
+* <noscript> tage makes the css to load asynchronously.
+* The critical path CSS is created by using this online tool: https://jonassebastianohlsson.com/criticalpathcssgenerator/
+
+	``` bash
+        <script async src="js/perfmatters.js"></script>
+        <!-- asynchronously load the crtical css -->
+        <noscript>
+            <link href="css/style.min.css" rel="stylesheet">
+            <link href="css/print.min.css" rel="stylesheet" media="print">
+        </noscript>
+    </body>
+    ```
+**2. Resize and compress the images for fast loading.**
+
+I used the free image optimizer tools online: http://jpeg-optimizer.com/ 
+
+There are also other great tools to use online:
+* http://www.imageoptimizer.net/Pages/Home.aspx
+* http://jpeg-optimizer.com/
+* http://mashable.com/2013/10/29/image-compressors/#rDkIhR44GPqV
+
+**3. Minimize the CSS for fast loading.**
+Using online CSS minimizing tool: https://cssminifier.com/
+
+### Optimize the Frame Rate
+By reviewing the Timeline in WebTools, the bottleneck of the FPS is when calling the update Position. Here is my revise to the updatePosition() function below:
+
+	``` bash
+	var items = document.getElementsByClassName('mover');
+
+ 	var tops = document.body.scrollTop / 1250;
+
+  	//make a for loop for phase to give a exact number that phase and document.body.scrollTop give per iteration
+  	var phase = [];
+
+  	for (var i = 0; i < items.length; i++) {
+
+    for (var j = 0; j < 5; j++) {
+      var number = [0,1,2,3,4];
+      phase.push(Math.sin(tops + number[j]));
+    }
+ 
+    //var phase = Math.sin(tops + (i % 5)); //(i % 5) modulo operat
+    items[i].style.left = items[i].basicLeft + 100 * phase[i] + 'px';
+    //items[i].style.transform = 'translateX(' + (700 * phase[i]) + 'px)';
+  	}
+  	```
+### Optimize the Computation Efficiency
+**1. Faster Web API calls**
+
+	``` bash
+	document.getElementById() or document.getElementByClassName()
+	```
+
+	instead of
+
+	``` bash
+	document.querySelector() or document.querySelectorAll()
+	```
+**2. Provide fixed value for newwidth and dx.**
+
+At line 473 and 474, since the pizza sizes are all the same, you can provide a fixed value prior starting the iteration/loop for both variables. Perhaps the first selector ([0]) from the randomPizzaContainer variable. 
+
+	``` bash
+	var dx = determineDx(container[0], size);
+    var newwidth = (container[0].offsetWidth + dx) + 'px';
+
+    for (var i = 0; i < containerLength; i++) {
+      container[i].style.width = newwidth;
+    }
+    ```
+Same reason for document.getElementsByClassName('randomPizzaContainer') at line 467.
+
+    ``` bash
+    //create a local variable to save document.getElementsByClassName('randomPizzaContainer') 
+    var container = document.getElementsByClassName('randomPizzaContainer');
+
+    //save the array length in local variable, so the array'e length property is not accessed to check its value at each iteration. It is more efficiency.
+    var containerLength = container.length;
+    ```
+
+Same reason for pizzasDiv at line 494.
+
+    ``` bash
+    var pizzasDiv = document.getElementById('randomPizzas');
+    ```
+
+Same reason for elem at line 598, and same reason for movingPizzas at line 600
+
 
 ### Optimization Tips and Tricks
 * [Optimizing Performance](https://developers.google.com/web/fundamentals/performance/ "web performance")
