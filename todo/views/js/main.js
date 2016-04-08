@@ -532,14 +532,15 @@ function updatePositions() {
   var tops = document.body.scrollTop / 1250;
 
   //make a for loop for phase to give a exact number that phase and document.body.scrollTop give per iteration
-  var phase = [];
+  var phases = [];
+  for (var i = 0; i < 5; i++) {
+    phases.push(Math.sin(tops + i));
+  }
 
+  var phase;
   for (var i = 0; i < items.length; i++) {
-
-    for (var j = 0; j < 5; j++) {
-      var number = [0,1,2,3,4];
-      phase.push(Math.sin(tops + number[j]));
-    }
+    phase = phases[i%5];
+    
   /* 
       furthermore we see that the phase value depends on the modulo operator '%', Modulo give us the remainder when we divided by 5
       therefore we are calculting the same set of 5 numbers for all of our prizza no matter how big our list of pizza are!
@@ -554,7 +555,7 @@ function updatePositions() {
         CSS has hardware accelaration and certain transforms that reduce the need to trigger a re-layout 
         lot prople using transform: tranlateX() instead of style.left
     */
-    items[i].style.left = items[i].basicLeft + 100 * phase[i] + 'px';
+    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
     //items[i].style.transform = 'translateX(' + (700 * phase[i]) + 'px)';
   }
 
@@ -594,12 +595,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // I could only handful a pizza that show up on the screen at any given scroll, that amount doesn't look 
   //dynamically calculate the number of pizza needed to fill the screen.
-  //var pizzaScreen = (window.screen.height) * cols; 
+  var pizzaRows = window.innerHeight / 100;
+  var pizzaCols = window.innerWidth / 73.333;
+
   //Declaring the elem variable outside the loop will prevent it from being created every time the loop is executed.
   var elem;
   //document.getElementById() Web API call is faster.
   var movingPizzas = document.getElementById("movingPizzas1");
-  for (var i = 0; i < 30; i++) {
+  for (var i = 0; i < (pizzaRows * pizzaCols); i++) {
     elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";

@@ -43,13 +43,21 @@ You might find the FPS Counter/HUD Display useful in Chrome developer tools desc
 * The critical path CSS is created by using this online tool: https://jonassebastianohlsson.com/criticalpathcssgenerator/
 
 	``` bash
+   		<!-- asynchronously load the crtical css -->
+        <link href="css/style.min.css" rel="stylesheet">
+        <link href="css/print.min.css" rel="stylesheet" media="print">
+        // make non-block rendering Javascripts
+        <script>
+            (function(w, g) {
+                w['GoogleAnalyticsObject'] = g;
+                w[g] = w[g] || function() {
+                    (w[g].q = w[g].q || []).push(arguments)
+                };
+                w[g].l = 1 * new Date();
+            })(window, 'ga');
+        </script>
         <script async src="js/perfmatters.js"></script>
-        <!-- asynchronously load the crtical css -->
-        <noscript>
-            <link href="css/style.min.css" rel="stylesheet">
-            <link href="css/print.min.css" rel="stylesheet" media="print">
-        </noscript>
-    </body>
+     </body>
     ```
 **2. Resize and compress the images for fast loading.**
 
@@ -69,21 +77,19 @@ By reviewing the Timeline in WebTools, the bottleneck of the FPS is when calling
 	``` bash
 	var items = document.getElementsByClassName('mover');
 
- 	var tops = document.body.scrollTop / 1250;
+  	var tops = document.body.scrollTop / 1250;
 
   	//make a for loop for phase to give a exact number that phase and document.body.scrollTop give per iteration
-  	var phase = [];
+  	var phases = [];
+  	for (var i = 0; i < 5; i++) {
+    	phases.push(Math.sin(tops + i));
+  	}
 
+  	var phase;
   	for (var i = 0; i < items.length; i++) {
-
-    for (var j = 0; j < 5; j++) {
-      var number = [0,1,2,3,4];
-      phase.push(Math.sin(tops + number[j]));
-    }
- 
-    //var phase = Math.sin(tops + (i % 5)); //(i % 5) modulo operat
-    items[i].style.left = items[i].basicLeft + 100 * phase[i] + 'px';
-    //items[i].style.transform = 'translateX(' + (700 * phase[i]) + 'px)';
+    	phase = phases[i%5];
+    
+    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   	}
   	```
 ### Optimize the Computation Efficiency
@@ -128,6 +134,22 @@ Same reason for pizzasDiv at line 494.
 
 Same reason for elem at line 598, and same reason for movingPizzas at line 600
 
+**3. Dynamically calculations
+
+I could only handful a pizza that show up on the screen at any given scroll, that amount doesn't look dynamically calculate the number of pizza needed to fill the screen.
+
+	``` bash
+  var pizzaRows = window.innerHeight / 100;
+  var pizzaCols = window.innerWidth / 73.333;
+
+  //Declaring the elem variable outside the loop will prevent it from being created every time the loop is executed.
+  var elem;
+  //document.getElementById() Web API call is faster.
+  var movingPizzas = document.getElementById("movingPizzas1");
+  for (var i = 0; i < (pizzaRows * pizzaCols); i++) {
+    elem = document.createElement('img');
+    ...
+   ```
 
 ### Optimization Tips and Tricks
 * [Optimizing Performance](https://developers.google.com/web/fundamentals/performance/ "web performance")
