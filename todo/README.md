@@ -134,7 +134,7 @@ Same reason for pizzasDiv at line 494.
 
 Same reason for elem at line 598, and same reason for movingPizzas at line 600
 
-**3. Dynamically calculations
+**3. Dynamically calculations**
 
 I could only handful a pizza that show up on the screen at any given scroll, that amount doesn't look dynamically calculate the number of pizza needed to fill the screen.
 
