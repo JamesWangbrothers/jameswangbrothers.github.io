@@ -526,10 +526,12 @@ function updatePositions() {
 
   //var items = document.querySelectorAll('.mover');
   //Efficient to access DOM -> document.getElementbyClass()
+  //create the variable outside the loop, so the function only makes one DOM call
   var items = document.getElementsByClassName('mover');
 
   var tops = document.body.scrollTop / 1250;
 
+  //make a for loop for phase to give a exact number that phase and document.body.scrollTop give per iteration
   var phase = [];
 
   for (var i = 0; i < items.length; i++) {
@@ -538,8 +540,7 @@ function updatePositions() {
       var number = [0,1,2,3,4];
       phase.push(Math.sin(tops + number[j]));
     }
-  /* what are the exact numbers that phase and document.body.scrollTop give me per iteration?
-
+  /* 
       furthermore we see that the phase value depends on the modulo operator '%', Modulo give us the remainder when we divided by 5
       therefore we are calculting the same set of 5 numbers for all of our prizza no matter how big our list of pizza are!
   */
