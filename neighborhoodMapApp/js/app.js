@@ -8,7 +8,7 @@ function initMap() {
     var mapOptions =  {
         center: {lat: 37.3382, lng: -121.8863},
         scrollwheel: false,
-        zoom: 11,
+        zoom: 10,
         disableDefaultUI: true,
         zoomControl: true,
         streetViewControl: true,
@@ -37,35 +37,60 @@ var locations = [
         name: "SAP Center",
         lat: 37.332202,
         lng: -121.901078
-        //address: "525 W Santa Clara St San Jose, CA 95113"
+
+    },
+    {
+        name: "Stanford Univeristy",
+        lat: 37.426441,
+        lng: -122.170973
 
     },
     {
         name: "Mineta San José International Airport",
         lat: 37.362888,
         lng: -121.928930
-        //address: "1701 Airport Blvd San Jose, CA 95110"
+
+    },
+    {
+        name: "San Jose State Univeristy",
+        lat: 37.334659,
+        lng: -121.880822
 
     },
     {
         name: "California's Great America",
         lat: 37.392724,
         lng: -121.964893
-        //address: "4701 Great America Pkwy Santa Clara, CA 95054"
 
     },
     {
         name: "Westfield Valley Fair Mall",
         lat: 37.323682,
         lng: -121.965667
-        //address: "2855 Stevens Creek Blvd Santa Clara, CA 95050"
 
     },
     {
         name: "Levi's Stadium",
         lat: 37.402035,
         lng: -121.969099
-        //address: "4900 Marie P DeBartolo Way Santa Clara, CA 95054"
+
+    },
+    {
+        name: "De Anza College",
+        lat: 37.318669,
+        lng: -122.046003
+
+    },
+    {
+        name: "Computer History Museum",
+        lat: 37.413713,
+        lng: -122.077203
+
+    },
+    {
+        name: "Googleplex",
+        lat: 37.421732,
+        lng: -122.083876
 
     }   
 ];
@@ -138,7 +163,7 @@ var viewModel = function(){
             url:'https://api.foursquare.com/v2/venues/search',
             dataType: 'json',
             data: 'limit=1' +
-                    '&ll=37.3382,-121.8863' +
+                    '&ll=37.370626,-122.012272' +
                     '&query=' + placeItem.name() +
                     '&client_id='+ client_id +
                     '&client_secret='+ client_secret +
