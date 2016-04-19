@@ -1,12 +1,12 @@
 ## Website Performance Optimization portfolio project
 
-Your challenge, if you wish to accept it (and we sure hope you will), is to optimize this online portfolio for speed! In particular, optimize the critical rendering path and make this page render as quickly as possible by applying the techniques you've picked up in the [Critical Rendering Path course](https://www.udacity.com/course/ud884).
+It is a challenge I have accepted to optimize this online portfolio for speed! In particular, optimize the critical rendering path and make this page render as quickly as possible by applying the techniques I've picked up in the [Critical Rendering Path course](https://www.udacity.com/course/ud884).
 
 To get started, check out the repository, inspect the code,
 
 ### Getting started
 
-####Part 1: Optimize PageSpeed Insights score for index.html
+#### Part 1: Optimize PageSpeed Insights score for index.html
 
 Some useful tips to help you get started:
 
@@ -26,15 +26,114 @@ Some useful tips to help you get started:
   $> ngrok http 8080
   ```
 
-1. Copy the public URL ngrok gives you and try running it through PageSpeed Insights! Optional: [More on integrating ngrok, Grunt and PageSpeed.](http://www.jamescryer.com/2014/06/12/grunt-pagespeed-and-ngrok-locally-testing/)
+1. Copy the public URL ngrok gives you and try running it through PageSpeed Insights! Optional: [More on integrating ngrok, Grunt and PageSpeed.](http://www.jamescryer.com/2014/06/12/grunt-pagespeed-and-ngrok-locally-testing/) 
+2. Then Profile, optimize, measure... and then lather, rinse, and repeat.
 
-Profile, optimize, measure... and then lather, rinse, and repeat. Good luck!
-
-####Part 2: Optimize Frames per Second in pizza.html
+#### Part 2: Optimize Frames per Second in pizza.html
 
 To optimize views/pizza.html, you will need to modify views/js/main.js until your frames per second rate is 60 fps or higher. You will find instructive comments in main.js. 
 
 You might find the FPS Counter/HUD Display useful in Chrome developer tools described here: [Chrome Dev Tools tips-and-tricks](https://developer.chrome.com/devtools/docs/tips-and-tricks).
+
+### Optimize the Critical Rendering Path
+**1. Make non-block rendering for CSS and Javascripts before </body> tag in the "index.html".**
+* Adding async to javascript tag which makes it says, "I don't want the browser to stop what it's doing while it's downloading this script." It works the same to put the javascript link at the bottom of the page like below.
+* <noscript> tage makes the css to load asynchronously.
+* The critical path CSS is created by using this online tool: https://jonassebastianohlsson.com/criticalpathcssgenerator/
+
+	``` html
+   		<!-- asynchronously load the crtical css -->
+        <link href="css/style.min.css" rel="stylesheet">
+        <link href="css/print.min.css" rel="stylesheet" media="print">
+        <!-- make non-block rendering Javascripts -->
+        <script>
+            (function(w, g) {
+                w['GoogleAnalyticsObject'] = g;
+                w[g] = w[g] || function() {
+                    (w[g].q = w[g].q || []).push(arguments)
+                };
+                w[g].l = 1 * new Date();
+            })(window, 'ga');
+        </script>
+        <script async src="js/perfmatters.js"></script>
+     </body>
+    ```
+**2. Resize and compress the images for fast loading.**
+
+I used the free image optimizer tools online: http://jpeg-optimizer.com/ 
+
+There are also other great tools to use online:
+* http://www.imageoptimizer.net/Pages/Home.aspx
+* http://jpeg-optimizer.com/
+* http://mashable.com/2013/10/29/image-compressors/#rDkIhR44GPqV
+
+**3. Minimize the CSS for fast loading.**
+
+Using online CSS minimizing tool: https://cssminifier.com/
+
+### Optimize the Frame Rate
+By reviewing the Timeline in WebTools, the bottleneck of the FPS is when calling the update Position. Here is my revise to the updatePosition() function below:
+
+	    var items = document.getElementsByClassName('mover');
+  	    var tops = document.body.scrollTop / 1250;
+    	//make a for loop for phase to give a exact number that phase and document.body.scrollTop give per iteration
+  	    var phases = [];
+  	    for (var i = 0; i < 5; i++) {
+    	    phases.push(Math.sin(tops + i));
+  	    }
+  	    var phase;
+  	    for (var i = 0; i < items.length; i++) {
+    	    phase = phases[i%5];
+            items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+  	    }
+
+### Optimize the Computation Efficiency
+**1. Faster Web API calls**
+
+	document.getElementById() or document.getElementByClassName()
+
+instead of
+
+	document.querySelector() or document.querySelectorAll()
+
+**2. Provide fixed value for newwidth and dx.**
+
+At line 473 and 474, since the pizza sizes are all the same, you can provide a fixed value prior starting the iteration/loop for both variables. Perhaps the first selector ([0]) from the randomPizzaContainer variable. 
+
+	var dx = determineDx(container[0], size);
+    var newwidth = (container[0].offsetWidth + dx) + 'px';
+    for (var i = 0; i < containerLength; i++) {
+      container[i].style.width = newwidth;
+    }
+Same reason for document.getElementsByClassName('randomPizzaContainer') at line 467.
+
+    //create a local variable to save document.getElementsByClassName('randomPizzaContainer') 
+    var container = document.getElementsByClassName('randomPizzaContainer');
+
+    //save the array length in local variable, so the array'e length property is not accessed to check its value at each iteration. It is more efficiency.
+    var containerLength = container.length;
+
+Same reason for pizzasDiv at line 494.
+
+    var pizzasDiv = document.getElementById('randomPizzas');
+
+
+Same reason for elem at line 598, and same reason for movingPizzas at line 600
+
+**3. Dynamically calculations**
+
+I could only handful a pizza that show up on the screen at any given scroll, that amount doesn't look dynamically calculate the number of pizza needed to fill the screen.
+
+  	var pizzaRows = window.innerHeight / 100;
+  	var pizzaCols = window.innerWidth / 73.333;
+
+  	//Declaring the elem variable outside the loop will prevent it from being created every time the loop is executed.
+  	var elem;
+  	//document.getElementById() Web API call is faster.
+  	var movingPizzas = document.getElementById("movingPizzas1");
+  	for (var i = 0; i < (pizzaRows * pizzaCols); i++) {
+    elem = document.createElement('img');
+    ...
 
 ### Optimization Tips and Tricks
 * [Optimizing Performance](https://developers.google.com/web/fundamentals/performance/ "web performance")
