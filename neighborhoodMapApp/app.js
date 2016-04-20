@@ -6,10 +6,11 @@ function initMap() {
     
     // Create a map object and specify the DOM element for display.
     var mapOptions =  {
-        center: {lat: 37.3382, lng: -121.8863},
+        center: {lat: 37.368830, lng: -122.03635},
         scrollwheel: false,
-        zoom: 10,
+        zoom: 11,
         zoomControl: true,
+        styles: [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#444444"}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#f2f2f2"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#46bcec"},{"visibility":"on"}]}]
         //scaleControl: true
         //streetViewControl: true,
         //overviewMapControl: true,
@@ -31,7 +32,7 @@ function googleError() {
     showMapMessage(true);
 }
 
-/***********Model*****/
+/***********MODEL*************/
 var locations = [
     {
         name: "SAP Center",
@@ -128,7 +129,7 @@ var viewModel = function(){
     var client_id = '3YUNRB2OBRZFDK3NDXIKNGHQJOPD0JKSZ4P0MBFQVXTA33RN',
         client_secret = '3EN00YN11KGVKLNGT5WFRKCXN5VZ2J4PSEZGJTA4CRUWFJEM',
         infowindow = new google.maps.InfoWindow({maxWidth:200}),
-        //image = 'map-marker.png',
+        image = 'Images/mapicon.png',
         searchInput,
         location,
         marker,
@@ -153,12 +154,12 @@ var viewModel = function(){
         marker = new google.maps.Marker({
             position: new google.maps.LatLng(placeItem.lat(), placeItem.lng()),
             map: map,
-            //icon: image,
+            icon: image,
             animation: google.maps.Animation.DROP
         });
         placeItem.marker = marker;
 
-        /*******FOURSQUARE**********/
+        /***********FOURSQUARE*************/
         $.ajax({
             url:'https://api.foursquare.com/v2/venues/search',
             dataType: 'json',
@@ -187,7 +188,7 @@ var viewModel = function(){
                     placeItem.url(url || '');
 
                 // Content of the infowindow
-                placeItem.contentString = '<div id="iWindow"><h3>' + placeItem.name() + '</h3>'
+                placeItem.contentString = '<div id="iWindow"><h5>' + placeItem.name() + '</h5>'
                         +'<p>' + placeItem.address() + '</p><p><a href=' + placeItem.url() + '>' + placeItem.url() +
                         '</a></p><p><a target="_blank" href=https://www.google.com/maps/dir/Current+Location/' +
                         placeItem.lat() + ',' + placeItem.lng() + '>Directions</a></p></div>';
@@ -210,8 +211,15 @@ var viewModel = function(){
                 self.showMessage(true);
         }
         });
+
+        //add event listener for responsive map
+        google.maps.event.addDomListener(window, 'resize', function() {
+            var center = map.getCenter();
+            google.maps.event.trigger(map, "resize");
+            map.setCenter(center); 
+        });
         
-        //event listener for error
+        //add event listener for error
         google.maps.event.addListener(marker, 'click', function () {
             infowindow.open(map, this);
             placeItem.marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -224,7 +232,6 @@ var viewModel = function(){
     // Show the marker when the user clicks the list
     self.showInfo = function (placeItem) {
         google.maps.event.trigger(placeItem.marker, 'click');
-        //self.hideSidebar();
     };
 
     // Array containing markers based on search
@@ -234,11 +241,12 @@ var viewModel = function(){
     self.places().forEach(function (place) {
         self.visible.push(place);
     });
+    
+    //build the filter function to display search result, if input matches leave marker
 
     // Track input
     self.userInput = ko.observable('');
-    
-    //if input matches leave marker
+
     self.filterMarkers = function () {
         // Set all markers and places to not visible.
         searchInput = self.userInput().toLowerCase();

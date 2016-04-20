@@ -1,36 +1,94 @@
-body {
-  font-family: 'Montserrat', sans-serif;
+footer {
+	text-align: center;
+	color: #CCCCCC;
+	padding-top: 10px;
 }
 
-#list {
-	width:50%;
+input[type=search] {
+	text-indent: 30px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-image: url('Images/searchicon.png');
+    background-repeat: no-repeat;
+    background-position: 6px 3px; 
+    padding: 8px;
 }
 
-#map {
-	height: 300px;
-	width: 100%;
+
+::-webkit-input-placeholder {
+  color: #FFCC66;
 }
 
-.main{
+li{
+	cursor: pointer;
+	color:#7F7F7F;
+	padding: 4px;
+	font-size: 12px;
+	border-bottom: 1px dotted #E6E6E6;
+	border-top: 1px dotted #E6E6E6;
+	-webkit-transition: font-size 0.3s ease, background-color 0.3s ease;
+    -moz-transition: font-size 0.3s ease, background-color 0.3s ease;
+    transition: font-size 0.3s ease, background-color 0.3s ease;
+    -ms-transition: font-size 0.3s ease, background-color 0.3s ease;
+    transition: font-size 0.3s ease, background-color 0.3s ease;
+}
+
+li:hover{
+	text-decoration: bold;
+	/*background: rgba(226,226,226,1);*/
+	font-size: 18px;
+	box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+	color:#66CCFF;
+}
+
+li:active{
+	background-color:#FF6FCF;
+	color:#FFCC66;
+}
+
+.main {
 	display: flex;
+	height: auto;
+	border-bottom: 2px solid #FF6FCF;
 }
 
-input{
-	width:100%;
+#maps {
+    width: 100% !important;
+    height: 100% !important;
 }
+/*On different screen sizes, set readable font-size*/
+@media screen and (max-width: 340px) {
+	li {
+		font-size: 10px;
+	}
 
-li:hover {
-	text-decoration: none;
-	color: red;
-	background: rgba(255,255,255,0.2);
+	li:hover {
+		font-size: 16px;
+	}
 }
+@media screen and (min-width: 600px) {
+	li {
+		font-size: 14px;
+	}
 
-@media only screen and (max-width : 500px) 
-{
-	#map {
-		height: 500px;
+	li:hover {
+		font-size: 20px;
 	}
 }
 
+@media screen and (min-width: 800px) {
+	li {
+		font-size: 16px;
+	}
 
+	li:hover {
+		font-size: 22px;
+	}
+}
 
+@media screen and (max-width: 600px) {
+	#iWindow {
+		width: 100px;
+	}
+}
