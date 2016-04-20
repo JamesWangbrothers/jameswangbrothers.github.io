@@ -9,12 +9,12 @@ function initMap() {
         center: {lat: 37.3382, lng: -121.8863},
         scrollwheel: false,
         zoom: 10,
-        disableDefaultUI: true,
         zoomControl: true,
-        streetViewControl: true,
-        overviewMapControl: true,
-        rotateControl: true,
-        scaleControl: true
+        //scaleControl: true
+        //streetViewControl: true,
+        //overviewMapControl: true,
+        //rotateControl: true,
+        //disableDefaultUI: true,
         //mapTpyeId: google.maps.mapTpyeId.ROADMAP,
         //panControl: false,
         //mapTypeControl: false,

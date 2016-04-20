@@ -1,7 +1,36 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+
+#list {
+	width:50%;
+}
 
 #map {
-	width: 66.66%;
-	height: 80%;
-	background-color: #ccc;
-	position: absolute;
+	height: 300px;
+	width: 100%;
 }
+
+.main{
+	display: flex;
+}
+
+input{
+	width:100%;
+}
+
+li:hover {
+	text-decoration: none;
+	color: red;
+	background: rgba(255,255,255,0.2);
+}
+
+@media only screen and (max-width : 500px) 
+{
+	#map {
+		height: 500px;
+	}
+}
+
+
+
