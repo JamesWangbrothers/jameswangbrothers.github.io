@@ -1,3 +1,4 @@
+
 footer {
 	text-align: center;
 	color: #CCCCCC;
@@ -54,8 +55,8 @@ li:active{
 }
 
 #maps {
-    width: 100% !important;
-    height: 100% !important;
+    max-width: 100%;
+    height: auto;
 }
 /*On different screen sizes, set readable font-size*/
 @media screen and (max-width: 340px) {
