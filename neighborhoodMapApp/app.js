@@ -1,4 +1,5 @@
-'use strict'
+'use strict';
+
 var map,
     showMapMessage = ko.observable(false);
 //loads the google maps API
@@ -17,7 +18,6 @@ function initMap() {
         //rotateControl: true,
         //disableDefaultUI: true,
         //mapTpyeId: google.maps.mapTpyeId.ROADMAP,
-        //panControl: false,
         //mapTypeControl: false,
     };
 
@@ -160,7 +160,7 @@ var viewModel = function(){
         placeItem.marker = marker;
 
         /***********FOURSQUARE*************/
-        $.ajax({
+        var request = $.ajax({
             url:'https://api.foursquare.com/v2/venues/search',
             dataType: 'json',
             data: 'limit=1' +
@@ -169,11 +169,9 @@ var viewModel = function(){
                     '&client_id='+ client_id +
                     '&client_secret='+ client_secret +
                     '&v=20160419',
-
-            async: true,
-
+            });
             // If data call is successful - check for various properties and assign them to observables
-            success: function (data) {
+            request.done(function (data) {
                 // If incoming data has a venues object set the first one to the var venue
                 venue = data.response.hasOwnProperty("venues") ? data.response.venues[0] : '';
 
@@ -203,14 +201,14 @@ var viewModel = function(){
                     }, 800);
                     infowindow.setContent(placeItem.contentString);
                 });
-            },
+            });
 
             // Alert the user on error
-            error: function (e) {
+            request.fail(function (e) {
                 infowindow.setContent('<h5>Foursquare data is unavailable.</h5>');
-                self.showMessage(true);
-        }
-        });
+                // self.showMessage(true);
+            });
+        
 
         //add event listener for responsive map
         google.maps.event.addDomListener(window, 'resize', function() {
