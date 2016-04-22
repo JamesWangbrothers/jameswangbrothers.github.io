@@ -160,6 +160,8 @@ var viewModel = function(){
         placeItem.marker = marker;
 
         /***********FOURSQUARE*************/
+        // If data call is successful - check for various properties and assign them to observables
+        // Alert the user on error
         var request = $.ajax({
             url:'https://api.foursquare.com/v2/venues/search',
             dataType: 'json',
@@ -169,45 +171,46 @@ var viewModel = function(){
                     '&client_id='+ client_id +
                     '&client_secret='+ client_secret +
                     '&v=20160419',
+        }).done(function (data) { 
+            // If incoming data has a venues object set the first one to the var venue
+            venue = data.response.hasOwnProperty("venues") ? data.response.venues[0] : '';
+
+            // If the new venue has a property called location set that to the variable location
+            location = venue.hasOwnProperty('location') ? venue.location : '';
+                // If new location has prop address then set the observable address to that or blank
+                if (location.hasOwnProperty('address')) {
+                    placeItem.address(location.address || '');
+                }
+
+            url = venue.hasOwnProperty('url') ? venue.url : '';
+                placeItem.url(url || '');
+
+            // Content of the infowindow
+            placeItem.contentString = '<div id="iWindow"><h5>' + placeItem.name() + '</h5>'
+                    +'<p>' + placeItem.address() + '</p><p><a href=' + placeItem.url() + '>' + placeItem.url() +
+                    '</a></p><p><a target="_blank" href=https://www.google.com/maps/dir/Current+Location/' +
+                    placeItem.lat() + ',' + placeItem.lng() + '>Directions</a></p></div>';
+
+            // Add infowindows
+            google.maps.event.addListener(placeItem.marker, 'click', function () {
+                infowindow.open(map, this);
+                // Bounce animation
+                placeItem.marker.setAnimation(google.maps.Animation.BOUNCE);
+                setTimeout(function () {
+                    placeItem.marker.setAnimation(null);
+                }, 1400);
+                infowindow.setContent(placeItem.contentString);
+
+                // 3 seconds after the center of the map has changed, pan back to the marker.
+                window.setTimeout(function() {
+                    map.panTo(marker.getPosition());
+                }, 3000);
+
             });
-            // If data call is successful - check for various properties and assign them to observables
-            request.done(function (data) {
-                // If incoming data has a venues object set the first one to the var venue
-                venue = data.response.hasOwnProperty("venues") ? data.response.venues[0] : '';
-
-                // If the new venue has a property called location set that to the variable location
-                location = venue.hasOwnProperty('location') ? venue.location : '';
-                    // If new location has prop address then set the observable address to that or blank
-                    if (location.hasOwnProperty('address')) {
-                        placeItem.address(location.address || '');
-                    }
-
-                url = venue.hasOwnProperty('url') ? venue.url : '';
-                    placeItem.url(url || '');
-
-                // Content of the infowindow
-                placeItem.contentString = '<div id="iWindow"><h5>' + placeItem.name() + '</h5>'
-                        +'<p>' + placeItem.address() + '</p><p><a href=' + placeItem.url() + '>' + placeItem.url() +
-                        '</a></p><p><a target="_blank" href=https://www.google.com/maps/dir/Current+Location/' +
-                        placeItem.lat() + ',' + placeItem.lng() + '>Directions</a></p></div>';
-
-                // Add infowindows
-                    google.maps.event.addListener(placeItem.marker, 'click', function () {
-                    infowindow.open(map, this);
-                    // Bounce animation
-                    placeItem.marker.setAnimation(google.maps.Animation.BOUNCE);
-                    setTimeout(function () {
-                        placeItem.marker.setAnimation(null);
-                    }, 800);
-                    infowindow.setContent(placeItem.contentString);
-                });
-            });
-
-            // Alert the user on error
-            request.fail(function (e) {
-                infowindow.setContent('<h5>Foursquare data is unavailable.</h5>');
-                // self.showMessage(true);
-            });
+        }).fail(function (e) {
+            infowindow.setContent('<h5>Foursquare data is unavailable.</h5>');
+            // self.showMessage(true);
+        });
         
 
         //add event listener for responsive map
@@ -217,14 +220,6 @@ var viewModel = function(){
             map.setCenter(center); 
         });
         
-        //add event listener for error
-        google.maps.event.addListener(marker, 'click', function () {
-            infowindow.open(map, this);
-            placeItem.marker.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(function () {
-                placeItem.marker.setAnimation(null);
-            }, 800);
-        });
     });
 
     // Show the marker when the user clicks the list
